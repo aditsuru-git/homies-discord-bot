@@ -8,12 +8,12 @@ const {
 class MessageBuilder {
   constructor(options = {}) {
     this.embed = new EmbedBuilder();
-    this.buttons = [];
+    this.buttonRows = [[]]; // Initialize with one empty row
     this.maxButtonsPerRow = 5;
     this.embed.setColor(options.color || 0xaed6ff);
   }
 
-  // Added validation for common empty/null cases
+  // Existing embed methods remain the same
   setTitle(title) {
     if (title) this.embed.setTitle(title);
     return this;
@@ -49,6 +49,15 @@ class MessageBuilder {
     return this;
   }
 
+  // Add a new method to create a new row
+  addRow() {
+    // Only add a new row if the current row has buttons
+    if (this.buttonRows[this.buttonRows.length - 1].length > 0) {
+      this.buttonRows.push([]);
+    }
+    return this;
+  }
+
   addButton({
     customId,
     label,
@@ -69,7 +78,6 @@ class MessageBuilder {
 
     if (url) {
       button.setURL(url);
-      // Link buttons must use ButtonStyle.Link
       button.setStyle(ButtonStyle.Link);
     } else {
       button.setCustomId(customId);
@@ -77,21 +85,31 @@ class MessageBuilder {
 
     if (emoji) button.setEmoji(emoji);
 
-    this.buttons.push(button);
+    // Get the current row
+    const currentRow = this.buttonRows[this.buttonRows.length - 1];
+
+    // Check if current row has space
+    if (currentRow.length >= this.maxButtonsPerRow) {
+      throw new Error(
+        `Cannot add more than ${this.maxButtonsPerRow} buttons to a row`
+      );
+    }
+
+    // Add button to current row
+    currentRow.push(button);
     return this;
   }
 
   build() {
     const message = { embeds: [this.embed] };
 
-    if (this.buttons.length > 0) {
-      message.components = [];
-      for (let i = 0; i < this.buttons.length; i += this.maxButtonsPerRow) {
-        const row = new ActionRowBuilder().addComponents(
-          this.buttons.slice(i, i + this.maxButtonsPerRow)
-        );
-        message.components.push(row);
-      }
+    // Filter out empty rows and create components
+    const nonEmptyRows = this.buttonRows.filter((row) => row.length > 0);
+
+    if (nonEmptyRows.length > 0) {
+      message.components = nonEmptyRows.map((row) =>
+        new ActionRowBuilder().addComponents(row)
+      );
     }
 
     return message;

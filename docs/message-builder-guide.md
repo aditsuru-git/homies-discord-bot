@@ -1,169 +1,146 @@
-# MessageBuilder Class Usage Guide
+# MessageBuilder Guide
 
-The MessageBuilder class simplifies the creation of rich Discord messages with embeds and buttons. This guide covers usage patterns, rules, and best practices.
+A utility class for building Discord.js messages with embeds and buttons in a chainable manner.
 
-## Basic Usage
+> I advice using discord.js provided builders directly for complex embeds and buttons.
+
+## Installation
 
 ```javascript
-const MessageBuilder = require("./messageBuilder");
+const MessageBuilder = require("../../base/MessageBuilder");
+```
 
-const message = new MessageBuilder()
-  .setTitle("Hello World")
+## Quick Start
+
+```javascript
+const builder = new MessageBuilder();
+
+const message = builder
+  .setTitle("Welcome!")
   .setDescription("This is a sample message")
+  .addButton({
+    customId: "click_me",
+    label: "Click Me",
+    style: MessageBuilder.ButtonStyle.Primary,
+  })
   .build();
+
+// Send the message
+channel.send(message);
 ```
 
-## Embed Properties
-
-### Optional Properties
-
-All embed properties are optional but should be used appropriately:
-
-- `title`: Message title
-- `description`: Main message content
-- `footer`: Footer text and optional icon
-- `color`: Hex color code (default: 0xaed6ff)
-- `thumbnail`: Small image in top right
-- `image`: Large image below description
-- `fields`: Additional titled sections
-
-## Button Properties
-
-### Required Button Properties
-
-When adding a button, you must provide:
-
-- `label`: Button text
-- Either `customId` (for interactive buttons) or `url` (for link buttons)
-
-### Optional Button Properties
-
-- `style`: Button style (defaults to Primary)
-- `emoji`: Button emoji
-- `disabled`: Boolean to disable button
-- `url`: Makes the button a link button
-
-## Rules and Constraints
-
-### Button Rules
-
-- Maximum 5 buttons per row
-- Link buttons must use ButtonStyle.Link
-- Buttons require either customId or url
-- Cannot mix customId and url in same button
-
-### Embed Rules
-
-- Empty or null values are safely handled
-- Color must be a valid hex code
-- URLs must be valid strings
-
-## Methods
-
-### Embed Methods
-
-All methods return `this` for chaining:
+## Constructor Options
 
 ```javascript
-messageBuilder
-  .setTitle("Title")
-  .setDescription("Description")
-  .setFooter("Footer")
-  .setColor(0xff0000)
-  .setThumbnail("thumbnail-url")
-  .setImage("image-url")
-  .addField("Field Name", "Field Value", false);
-```
-
-### Button Methods
-
-Add buttons using the addButton method:
-
-```javascript
-messageBuilder.addButton({
-  customId: "button-id",
-  label: "Click Me",
-  style: MessageBuilder.ButtonStyle.Primary,
-  emoji: "👋",
-  disabled: false,
+const builder = new MessageBuilder({
+  color: 0xaed6ff, // Default color, optional
 });
 ```
 
-### Available Button Styles
+## Embed Methods
+
+All embed methods are chainable and optional:
+
+- `setTitle(title)`: Sets embed title
+- `setDescription(description)`: Sets embed description
+- `setFooter(text, iconURL)`: Sets footer text and optional icon
+- `setColor(color)`: Sets embed color (hex code)
+- `setThumbnail(url)`: Sets thumbnail image
+- `setImage(url)`: Sets main embed image
+- `addField(name, value, inline = false)`: Adds a field to the embed
+
+## Button Methods
+
+- `addButton(options)`: Adds a button to the current row
+  ```javascript
+  {
+    customId: string; // Required unless url is provided
+    label: string; // Required
+    style: ButtonStyle; // Optional, defaults to Primary
+    emoji: string; // Optional
+    disabled: boolean; // Optional, defaults to false
+    url: string; // Optional, for link buttons
+  }
+  ```
+- `addRow()`: Creates a new row for buttons
+
+## Button Styles
+
+Available through `MessageBuilder.ButtonStyle`:
+
+- `Primary`
+- `Secondary`
+- `Success`
+- `Danger`
+- `Link` (requires URL instead of customId)
+
+## Limitations
+
+- Maximum 5 buttons per row
+- Maximum 5 rows of buttons per message
+- Buttons require either customId or url
+
+## Final Build
+
+Always end your chain with `.build()` to get the final message object:
 
 ```javascript
-MessageBuilder.ButtonStyle.Primary; // Blue
-MessageBuilder.ButtonStyle.Secondary; // Grey
-MessageBuilder.ButtonStyle.Success; // Green
-MessageBuilder.ButtonStyle.Danger; // Red
-MessageBuilder.ButtonStyle.Link; // Link button
-```
-
-## Examples
-
-### Basic Embed Message
-
-```javascript
-const message = new MessageBuilder()
-  .setTitle("Welcome")
-  .setDescription("Welcome to our server!")
-  .setFooter("Created by Bot")
-  .setColor(0x00ff00)
+const message = builder
+  // ... your chain of methods
   .build();
 ```
 
-### Message with Buttons
+# Button Handler Guide
 
-```javascript
-const message = new MessageBuilder()
-  .setTitle("Reaction Roles")
-  .setDescription("Click a button to get a role")
-  .addButton({
-    customId: "role-1",
-    label: "Get Role",
-    style: MessageBuilder.ButtonStyle.Primary,
-  })
-  .addButton({
-    url: "https://discord.com",
-    label: "Visit Website",
-    style: MessageBuilder.ButtonStyle.Link,
-  })
-  .build();
+## Handling Button Interactions
+
+The button handler automatically loads and processes button interactions from organized subdirectories.
+
+### File Structure
+
+```
+buttons/
+  ├── category1/
+  │   ├── button1.js
+  │   └── button2.js
+  └── category2/
+      └── button3.js
 ```
 
-### Complex Message with Fields and Multiple Buttons
+### Creating Button Handlers
 
-```javascript
-const message = new MessageBuilder()
-  .setTitle("Server Status")
-  .setDescription("Current server status and options")
-  .addField("Online Users", "127", true)
-  .addField("Total Channels", "15", true)
-  .setFooter("Last updated")
-  .addButton({
-    customId: "refresh",
-    label: "Refresh",
-    emoji: "🔄",
-  })
-  .addButton({
-    customId: "settings",
-    label: "Settings",
-    style: MessageBuilder.ButtonStyle.Secondary,
-  })
-  .build();
-```
-
-## Handling Button Callbacks
-
-- Create a file for your button callback inside a subfolder of `/src/buttons`
+1. Create a new file in a subdirectory of the `/buttons` folder
+2. Export an object with the following structure:
 
 ```javascript
 module.exports = {
-  customId = "button_id"
-  callback (client, interaction) {
-    const originalMessage = interaction.message // To get the original message which has the button.
-  }
-}
+  customId: "your-button-id", // Must match the customId set in your button
+  callback: async (client, interaction) => {
+    // Your button interaction logic here
+  },
+};
 ```
 
-- Use database to perform security checks like allowing only specific users to use the button.
+### Required Properties
+
+- `customId`: String matching the button's customId
+- `callback`: Async function that receives:
+  - `client`: Discord.js Client instance
+  - `interaction`: Button interaction object
+
+### Error Handling
+
+The button handler includes built-in error handling:
+
+- Invalid button files are skipped with a warning
+- Unhandled buttons receive an ephemeral error message
+- Failed interactions are caught and logged
+- Automatic handling of replied/deferred interactions
+
+### Best Practices
+
+1. Organize buttons in category folders
+2. Use clear, descriptive customIds
+3. Include try-catch blocks in callbacks
+4. Handle interaction responses appropriately
+5. Keep button logic focused and concise

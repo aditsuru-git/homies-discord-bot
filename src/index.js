@@ -1,6 +1,6 @@
 const { Client, IntentsBitField, Message } = require("discord.js");
 const eventHandler = require("./handlers/eventHandler");
-// const connectDatabase = require("./config/database");
+const connectDatabase = require("./database/connectDB");
 
 require("dotenv").config();
 
@@ -15,7 +15,7 @@ const client = new Client({
 
 (async () => {
   try {
-    // await connectDatabase();
+    await connectDatabase();
     eventHandler(client);
     client.login(process.env.DISCORD_TOKEN);
   } catch (error) {

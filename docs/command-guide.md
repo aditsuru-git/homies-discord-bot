@@ -2,7 +2,7 @@
 
 The Command class is designed to handle both prefix and slash commands for a Discord bot. This guide explains how to use the class effectively and details its rules and constraints.
 
-## Basic Usage
+## Quick Start
 
 ```javascript
 const Command = require("./command");
@@ -10,10 +10,10 @@ const Command = require("./command");
 const myCommand = new Command()
   .setName("commandname")
   .setDescription("Command Description")
-  .setPrefixCommandLogic((client, message, args) => {
+  .setPrefixCommandLogic(async (client, message, args) => {
     //Prefix command logic
   })
-  .setSlashCommandLogic((client, interaction) => {
+  .setSlashCommandLogic(async (client, interaction) => {
     //Slash command logic
   });
 ```
@@ -27,11 +27,11 @@ const myCommand = new Command()
 
 ### Optional Properties
 
-- `testingPhase`: Boolean flag for commands in testing
-- `devsOnly`: Boolean flag for developer-only commands
+- `testingPhase`: Boolean, allows only testers & developers to use
+- `devsOnly`: Boolean, allows only developers to use
 - `prefixOnly`: Boolean flag for prefix-only commands
 - `options`: Array of command options
-- `deleted`: Boolean flag for soft-deleted commands
+- `deleted`: Boolean, deletes the commands when bot comes online
 
 ## Validation Rules
 
@@ -83,7 +83,7 @@ Two types of command handlers:
 1. Prefix Command Logic:
 
 ```javascript
-setPrefixCommandLogic((client, message, args) => {
+setPrefixCommandLogic(async (client, message, args) => {
   // Handle prefix command
 });
 ```
@@ -91,7 +91,7 @@ setPrefixCommandLogic((client, message, args) => {
 2. Slash Command Logic:
 
 ```javascript
-setSlashCommandLogic((client, interaction) => {
+setSlashCommandLogic(async (client, interaction) => {
   // Handle slash command
 });
 ```
@@ -113,7 +113,7 @@ setSlashCommandLogic((client, interaction) => {
 ## Example Implementation
 
 ```javascript
-const Command = require("./command");
+const Command = require("../../base/command");
 
 const kickCommand = new Command()
   .setName("kick")

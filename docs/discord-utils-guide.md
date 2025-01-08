@@ -1,10 +1,10 @@
 # Discord Bot Utilities Guide
 
-This guide covers two utility modules for Discord bots: Mention Parser and Permissions Checker.
+This guide covers two utility modules: Mention Parser and Permissions Checker.
 
 ## Mention Parser Utilities
 
-The mention parser provides functions to validate and extract IDs from Discord channel and user mentions. You will use this to validate prefix command args where the channel and user mentions will be in markdown like this "`<@user>`" and "`<@#channel>`".
+The Mention Parser helps validate user and channel mentions in prefix commands. Both functions return either a valid ID or null after validation.
 
 ### Channel Mention Validation
 
@@ -12,7 +12,7 @@ The mention parser provides functions to validate and extract IDs from Discord c
 const { validateChannelMention } = require("../../utils/discord/mentionParser");
 
 // Example usage
-.setPrefixCommandLogic(function(client, message, args)) {
+.setPrefixCommandLogic(async (client, message, args) => {
   const channelId = await validateChannelMention(args[0], client);
 
   if (channelId) {
@@ -20,7 +20,7 @@ const { validateChannelMention } = require("../../utils/discord/mentionParser");
   } else {
     console.log("Invalid channel mention");
   }
-}
+});
 
 // Valid format: <#123456789012345678>
 ```
@@ -38,7 +38,7 @@ const { validateChannelMention } = require("../../utils/discord/mentionParser");
 const { validateUserMention } = require("../../utils/discord/mentionParser");
 
 // Example usage
-.setPrefixCommandLogic(function(client, message, args)) {
+.setPrefixCommandLogic(async (client, message, args) => {
   const userId = await validateUserMention(args[0], client);
 
   if (userId) {
@@ -46,7 +46,7 @@ const { validateUserMention } = require("../../utils/discord/mentionParser");
   } else {
     console.log("Invalid user mention");
   }
-}
+});
 
 // Valid formats:
 // <@123456789012345678>
@@ -62,67 +62,38 @@ const { validateUserMention } = require("../../utils/discord/mentionParser");
 
 ## Permissions Utilities
 
-The permissions module provides functions to check user permissions for both slash and prefix commands.
+The permissions module handles permission checks for both slash and prefix commands.
 
-### Slash Command Permissions
-
-```javascript
-const { checkSlashPermission } = require("../../utils/discord/permissions");
-
-// Single permission check
-function handleKickCommand(interaction) {
-  if (!checkSlashPermission("KickMembers", interaction)) {
-    return interaction.reply("You need Kick Members permission!");
-  }
-  // Command logic here
-}
-
-// Multiple permissions check
-function handleModCommand(interaction) {
-  const requiredPerms = ["KickMembers", "BanMembers", "ManageMessages"];
-  const requireAll = true; // Must have all permissions
-
-  if (!checkSlashPermission(requiredPerms, interaction, requireAll)) {
-    return interaction.reply("Insufficient permissions!");
-  }
-  // Command logic here
-}
-```
-
-### Prefix Command Permissions
+### Permission Checks
 
 ```javascript
-const { checkPrefixPermission } = require("../../utils/discord/permissions");
+const {
+  checkPrefixPermission,
+  checkSlashPermission,
+} = require("../../utils/discord/permissions");
 
 // Single permission check
-function handleBanCommand(message) {
-  if (!checkPrefixPermission("BanMembers", message)) {
-    return message.reply("You need Ban Members permission!");
-  }
-  // Command logic here
-}
+await checkPrefixPermission("BanMembers", message);
 
-// Multiple permissions with ANY logic
-function handleAdminCommand(message) {
-  const requiredPerms = ["Administrator", "ManageGuild"];
-  const requireAll = false; // Only need one of these permissions
+// Multiple permissions (require ALL)
+await checkPrefixPermission(["BanMembers", "KickMembers"], message);
 
-  if (!checkPrefixPermission(requiredPerms, message, requireAll)) {
-    return message.reply("You need Administrator OR Manage Server permission!");
-  }
-  // Command logic here
-}
+// Multiple permissions (require ANY)
+await checkPrefixPermission(["BanMembers", "KickMembers"], message, false);
+
+// Same pattern for slash commands
+await checkSlashPermission("BanMembers", interaction);
 ```
 
-### Permission Check Parameters
+### Parameters
 
-- `permissions`: String or array of permission strings
-- `interaction/message`: Discord interaction or message object
+- `permissions`: String or string array of permission flags
+- `interaction/message`: Discord.js Interaction or Message object
 - `requireAll`: Boolean (default: true)
-  - `true`: User must have ALL specified permissions
-  - `false`: User must have ANY of the specified permissions
+  - `true`: User needs ALL specified permissions
+  - `false`: User needs ANY of the specified permissions
 
-### Common Permission Flags
+### Available Permission Flags
 
 ```javascript
 "CreateInstantInvite";
@@ -150,7 +121,7 @@ function handleAdminCommand(message) {
 "MuteMembers";
 "DeafenMembers";
 "MoveMembers";
-"UseVAD"; // Voice Activity Detection
+"UseVAD";
 "ChangeNickname";
 "ManageNicknames";
 "ManageRoles";
@@ -170,15 +141,16 @@ function handleAdminCommand(message) {
 
 ## Error Handling
 
-Both utilities include built-in error handling:
+Both utilities include comprehensive error handling:
 
-- Mention validation functions:
+### Mention Validation
 
-  - Return `null` on failure
-  - Log errors to console with detailed messages
-  - Handle invalid formats, non-existent users/channels
+- Returns `null` for invalid mentions
+- Logs detailed error messages to console
+- Handles invalid formats and inaccessible users/channels
 
-- Permission checks:
-  - Return `false` if permissions or objects are invalid
-  - Safely handle missing member/channel data
-  - Support both single and multiple permission checks
+### Permission Checks
+
+- Returns `false` for invalid permissions
+- Safely handles missing guild data
+- Supports both single and batch permission checks

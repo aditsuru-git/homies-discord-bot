@@ -4,7 +4,7 @@
   "description": "This is framework which provides utilities for creating discord bots.",
   "main": "index.js",
   "scripts": {
-    "test": "node src/index",
+    "start": "node src/index",
     "dev": "nodemon src/index"
   },
   "repository": {
