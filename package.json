@@ -1,0 +1,25 @@
+{
+  "name": "discordbotframework",
+  "version": "1.0.0",
+  "description": "This is framework which provides utilities for creating discord bots.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node src/index",
+    "dev": "nodemon src/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aditsuru-git/discordBotFramework"
+  },
+  "author": "Adi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aditsuru-git/discordBotFramework/issues"
+  },
+  "homepage": "https://github.com/aditsuru-git/discordBotFramework#readme",
+  "dependencies": {
+    "discord.js": "^14.17.2",
+    "dotenv": "^16.4.7",
+    "mongoose": "^8.9.3"
+  }
+}
