@@ -44,9 +44,10 @@ npm run start   # Runs normally using node
 
 Refer to these guides to get started:
 
-1. **Commands Guide** - Learn how to build bot commands
-2. **Message Builder Guide** - Create embeds with buttons using the MessageBuilder utility class
+1. **Commands Guide** - Learn how to build commands
+2. **Button Interactions** - Learn how to handle button interactions
 3. **Utils Guide** - Understand available utility functions
+4. **Event Listener** - Learn how to add a new event listener
 
 ## Best Practices
 
