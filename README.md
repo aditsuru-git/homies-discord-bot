@@ -1,6 +1,6 @@
 # Discord Bot Template
 
-A modern Discord.js bot template with utility classes and structured command handling.
+A modern Discord.js bot template.
 
 ## Getting Started
 
